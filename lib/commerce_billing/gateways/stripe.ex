@@ -121,7 +121,7 @@ defmodule Commerce.Billing.Gateways.Stripe do
     method
       |> HttpRequest.new("#{@base_url}/#{path}")
       |> HttpRequest.put_body(params, :url_encoded)
-      |> HttpRequest.put_basic_auth(config.credentials)
+      |> HttpRequest.put_auth(:basic, config.credentials)
       |> HttpRequest.send
       |> respond
   end

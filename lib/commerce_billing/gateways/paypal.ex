@@ -18,7 +18,7 @@ defmodule Commerce.Billing.Gateways.Paypal do
     request =
       HttpRequest.new(:post, "#{@base_url}/oauth2/token")
       |> HttpRequest.put_body(body, :url_encoded)
-      |> HttpRequest.put_basic_auth(config.credentials)
+      |> HttpRequest.put_auth(:basic, config.credentials)
     
     case HttpRequest.send(request) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
@@ -45,15 +45,33 @@ defmodule Commerce.Billing.Gateways.Paypal do
     commit(:post, "/payments/payment", params, opts)
   end
   
+  defp commit(method, path, params, opts) do
+    {:ok, config} = Keyword.fetch!(opts, :config)
+    token = config.access_token
+      
+    method
+      |> HttpRequest.new("#{@base_url}#{path}")
+      |> HttpRequest.put_body(params, :json)
+      |> HttpRequest.put_auth(:bearer, token)
+      |> HttpRequest.send
+      |> respond
+  end
+
+  defp respond({:ok, %{status_code: 200, body: body}}) do
+    IO.puts(body)
+    {:ok}
+  end
+
+  defp respond({:ok, %{status_code: status_code, body: body}}) do
+    IO.puts(status_code)
+    IO.puts("******************")
+    IO.puts(body)
+    {:ok}
+  end
+
   defp put_access_token(token, config),
     do: Map.put(config, :access_token, token)
-    
-  defp commit(method, path, params, opts) do
-    method
-      # |> http
-      # |> respond
-  end
-  
+
   defp put_intent(map, :sale),
     do: Map.put(map, :intent, "sale")
     
@@ -107,7 +125,7 @@ defmodule Commerce.Billing.Gateways.Paypal do
   end
   
   defp put_transactions(map, amount, opts) do
-    config = Keyword.fetch!(opts, :config)
+    {:ok, config} = Keyword.fetch!(opts, :config)
     currency = Keyword.get(opts, :currency, config.default_currency)
     amount = money_to_cents(amount)
     
