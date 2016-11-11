@@ -88,12 +88,13 @@ defmodule Commerce.Billing.Gateways.Stripe do
 
   defp card_params(card=%CreditCard{}) do
     {expiration_year, expiration_month} = card.expiration
+    {holder_first, holder_last} = card.holder
 
     ["card[number]":    card.number,
      "card[exp_year]":  expiration_year,
      "card[exp_month]": expiration_month,
      "card[cvc]":       card.cvc,
-     "card[name]":      card.name]
+     "card[name]":      "#{holder_first} #{holder_last}"]
   end
 
   defp card_params(id), do: [card: id]

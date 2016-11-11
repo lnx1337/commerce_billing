@@ -29,7 +29,7 @@ config = %{credentials: {"sk_test_BQokikJOvBiI2HlWgH4olfQ2", ""},
 
 Billing.Worker.start_link(Billing.Gateways.Stripe, config, name: :my_gateway)
 
-card = %Billing.CreditCard{name: "John Smith",
+card = %Billing.CreditCard{holder: {"John", "Smith"},
                             number: "4242424242424242",
                             expiration: {2017, 12},
                             cvc: "123"}

@@ -27,7 +27,7 @@ defmodule Commerce.Billing.Gateways.StripeTest do
         }
       }
     /
-    card = %CreditCard{name: "John Smith", number: "123456", cvc: "123", expiration: {2015, 11}}
+    card = %CreditCard{holder: {"John", "Smith"}, number: "123456", cvc: "123", expiration: {2015, 11}}
     address = %Address{street1: "123 Main", street2: "Suite 100", city: "New York", region: "NY", country: "US", postal_code: "11111"}
 
     with_post "https://api.stripe.com/v1/charges", {200, raw},
@@ -68,7 +68,7 @@ defmodule Commerce.Billing.Gateways.StripeTest do
         }
       }
     /
-    card = %CreditCard{name: "John Smith", number: "123456", cvc: "123", expiration: {2015, 11}}
+    card = %CreditCard{holder: {"John", "Smith"}, number: "123456", cvc: "123", expiration: {2015, 11}}
     address = %Address{street1: "123 Main", street2: "Suite 100", city: "New York", region: "NY", country: "US", postal_code: "11111"}
 
     with_post "https://api.stripe.com/v1/charges", {200, raw},
@@ -109,7 +109,7 @@ defmodule Commerce.Billing.Gateways.StripeTest do
         }
       }
     /
-    card = %CreditCard{name: "John Smith", number: "123456", cvc: "123", expiration: {2015, 11}}
+    card = %CreditCard{holder: {"John", "Smith"}, number: "123456", cvc: "123", expiration: {2015, 11}}
     address = %Address{street1: "123 Main", street2: "Suite 100", city: "New York", region: "NY", country: "US", postal_code: "11111"}
     destination = "stripe_id"
     application_fee = 123
@@ -187,7 +187,7 @@ defmodule Commerce.Billing.Gateways.StripeTest do
 
   test "store credit card without customer", %{config: config} do
     raw = ~S/{"id": "1234"}/
-    card = %CreditCard{name: "John Smith", number: "123456", cvc: "123", expiration: {2015, 11}}
+    card = %CreditCard{holder: {"John", "Smith"}, number: "123456", cvc: "123", expiration: {2015, 11}}
 
     with_post "https://api.stripe.com/v1/customers", {200, raw},
         response = Gateway.store(card, config: config) do
@@ -206,7 +206,7 @@ defmodule Commerce.Billing.Gateways.StripeTest do
 
   test "store credit card with customer", %{config: config} do
     raw = ~S/{"id": "1234"}/
-    card = %CreditCard{name: "John Smith", number: "123456", cvc: "123", expiration: {2015, 11}}
+    card = %CreditCard{holder: {"John", "Smith"}, number: "123456", cvc: "123", expiration: {2015, 11}}
 
     with_post "https://api.stripe.com/v1/customers/1234/card", {200, raw},
         response = Gateway.store(card, customer_id: 1234, config: config) do
