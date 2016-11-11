@@ -8,27 +8,29 @@ defmodule Commerce.Billing.Gateways.Paypal do
     Address
   }
   
+  alias Commerce.Billing.HttpRequest
+  
   @base_url "https://api.sandbox.paypal.com/v1"
   
   def init(config) do
-    case http(
-      :post,
-      "#{@base_url}/oauth2/token",
-      %{grant_type: "client_credentials"},
-      credentials: config.credentials)
-    do
+    body = %{grant_type: "client_credentials"}
+    
+    request =
+      HttpRequest.new(:post, "#{@base_url}/oauth2/token")
+      |> HttpRequest.put_body(body, :url_encoded)
+      |> HttpRequest.put_basic_auth(config.credentials)
+    
+    case HttpRequest.send(request) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
           config =
             body
-              |> decode!
-              |> Map.get("access_token")
-              |> put_access_token(config)
-        
+            |> decode!
+            |> Map.get("access_token")
+            |> put_access_token(config)
+            
           {:ok, config}
-
       {:ok, %HTTPoison.Response{status_code: code}} ->
         {:stop, "Unexpected #{code} http status code returned requesting access_token"}
-      
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:stop, reason}
     end
@@ -40,7 +42,7 @@ defmodule Commerce.Billing.Gateways.Paypal do
       |> put_payer(card_or_id, opts)
       |> put_transactions(amount, opts)
 
-    #commit(:post, "/payments/payment", params, opts)
+    commit(:post, "/payments/payment", params, opts)
   end
   
   defp put_access_token(token, config),
