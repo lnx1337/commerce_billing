@@ -47,7 +47,8 @@ defmodule Commerce.Billing.HttpRequest do
       request.method,
       request.url,
       request.body,
-      request.headers)
+      request.headers,
+      [timeout: 10_000])
   end
   
   defp put_header(request, header),

@@ -48,7 +48,7 @@ defmodule Commerce.Billing.Gateways.Paypal do
   defp commit(method, path, params, opts) do
     {:ok, config} = Keyword.fetch!(opts, :config)
     token = config.access_token
-      
+
     method
       |> HttpRequest.new("#{@base_url}#{path}")
       |> HttpRequest.put_body(params, :json)
@@ -57,17 +57,20 @@ defmodule Commerce.Billing.Gateways.Paypal do
       |> respond
   end
 
-  defp respond({:ok, %{status_code: 200, body: body}}) do
+  defp respond({:ok, %{status_code: status_code, body: body}}) do
     IO.puts(body)
-    {:ok}
+    {:ok, 1}
   end
 
   defp respond({:ok, %{status_code: status_code, body: body}}) do
     IO.puts(status_code)
     IO.puts("******************")
     IO.puts(body)
-    {:ok}
+    {:ok, 2}
   end
+  
+  defp respond({:error, reason}),
+    do: {:error, reason}
 
   defp put_access_token(token, config),
     do: Map.put(config, :access_token, token)
@@ -119,15 +122,15 @@ defmodule Commerce.Billing.Gateways.Paypal do
       city: opts_address.city,
       country_code: opts_address.country,
       state: opts_address.region,
+      postal_code: opts_address.postal_code
     }
-    
+
     Map.put(map, :billing_address, address)
   end
   
   defp put_transactions(map, amount, opts) do
     {:ok, config} = Keyword.fetch!(opts, :config)
     currency = Keyword.get(opts, :currency, config.default_currency)
-    amount = money_to_cents(amount)
     
     # TODO: add support for tax and shipping costs
     amount_map = %{

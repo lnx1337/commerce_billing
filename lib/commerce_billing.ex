@@ -1,7 +1,7 @@
 defmodule Commerce.Billing do
   use Application
 
-  import GenServer, only: [call: 2]
+  import GenServer, only: [call: 2, call: 3]
 
   # See http://elixir-lang.org/docs/stable/elixir/Application.html
   # for more information on OTP Applications
@@ -23,7 +23,7 @@ defmodule Commerce.Billing do
     do: call(worker, {:authorize, amount, card, opts})
 
   def purchase(worker, amount, card, opts \\ []),
-    do: call(worker, {:purchase, amount, card, opts})
+    do: call(worker, {:purchase, amount, card, opts}, 10_000)
 
   def capture(worker, id, opts \\ []),
     do: call(worker, {:capture, id, opts})
